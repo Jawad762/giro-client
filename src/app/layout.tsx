@@ -6,7 +6,6 @@ import AuthChecker from "@/components/Auth/AuthChecker";
 import ReduxProvider from "@/components/Shared/ReduxProvider";
 
 const MediumMontserrat = Montserrat({ weight: '400', subsets: ['latin'] })
-export const BoldMontserrat = Montserrat({ weight: '700', subsets: ['latin'] })
 
 export const metadata: Metadata = {
   title: "Giro",
