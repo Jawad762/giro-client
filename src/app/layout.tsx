@@ -1,11 +1,12 @@
 import type { Metadata } from "next";
 import "./globals.css";
-import { Montserrat } from 'next/font/google'
+import { Fira_Sans_Condensed, Inter } from 'next/font/google'
 import { ReactQueryProvider } from "@/components/Shared/ReactQueryProvider";
 import AuthChecker from "@/components/Auth/AuthChecker";
 import ReduxProvider from "@/components/Shared/ReduxProvider";
+import Header from "@/components/Shared/Header";
 
-const MediumMontserrat = Montserrat({ weight: '400', subsets: ['latin'] })
+const MediumMontserrat = Fira_Sans_Condensed({ weight: '400', subsets: ['latin'] })
 
 export const metadata: Metadata = {
   title: "Giro",
@@ -22,10 +23,11 @@ export default function RootLayout({
       <body
         className={`${MediumMontserrat.className} antialiased h-full w-full bg-darkPrimary text-white`}
       >
-        <main className="h-full w-full">
+        <main className="h-full w-full flex flex-col">
           <ReduxProvider>
             <AuthChecker>
               <ReactQueryProvider>
+                <Header/>
                 {children}
               </ReactQueryProvider>
             </AuthChecker>

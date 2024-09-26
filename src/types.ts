@@ -21,3 +21,9 @@ export interface ErrorType {
         }
     }
 }
+
+export interface LocationType {
+    description: string
+    lat: number
+    long: number
+}

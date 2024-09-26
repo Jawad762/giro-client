@@ -1,6 +1,9 @@
-'use client'
-import HomeComponent from '@/components/Home';
+import Hero from "@/components/Home/Hero";
 
 export default function Home() {
-  return <HomeComponent />;
+  return (
+    <>
+      <Hero />
+    </>
+  );
 }

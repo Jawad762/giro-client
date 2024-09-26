@@ -9,14 +9,38 @@
 }
 
 .bg-pattern-1 {
-  background-color: rgba(0, 0, 0, 1);
-  opacity: 1;
-  background-image:  linear-gradient(135deg, rgba(255, 255, 255, 0.04) 25%, transparent 25%), linear-gradient(225deg, rgba(255, 255, 255, 0.04) 25%, transparent 25%), linear-gradient(45deg, rgba(255, 255, 255, 0.04) 25%, transparent 25%), linear-gradient(315deg, rgba(255, 255, 255, 0.04) 25%, rgba(0, 0, 0, 1) 25%);
-  background-position:  12px 0, 12px 0, 0 0, 0 0;
-  background-size: 24px 24px;
-  background-repeat: repeat;
+  background-color: #111111;
+  background-image: linear-gradient(rgb(34, 34, 34, 0.5) 1px, transparent 1px),
+    linear-gradient(to right, rgba(34, 34, 34, 0.5) 1px, #111111 1px);
+  background-size: 80px 80px;
 }
 
 ._gradient-1 {
-  background: radial-gradient(circle at 90% 90%, white, #5280f7, #5864ff, #7a4ef5, #a242e5, #c538b3);
+  background: radial-gradient(
+    circle at 90% 90%,
+    white,
+    #5280f7,
+    #5864ff,
+    #7a4ef5,
+    #a242e5,
+    #c538b3
+  );
+}
+
+._container {
+  width: 100%;
+  padding-inline: 60px;
+  padding-block: 24px;
+  margin-inline: auto;
+  max-width: 1400px;
+}
+
+@media (max-width: 768px) {
+  ._container {
+    width: 100%;
+    padding-inline: 12px;
+    padding-block: 12px;
+    margin-inline: auto;
+    max-width: auto;
+  }
 }
