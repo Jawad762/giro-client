@@ -130,7 +130,7 @@ const Hero = () => {
       }
       const encrypted = CryptoJS.AES.encrypt(JSON.stringify(obj), process.env.NEXT_PUBLIC_ENCRYPTION_KEY as string).toString();
       router.push(
-        `/go?data=${encodeURIComponent(encrypted)})}`
+        `/rider/go?data=${encodeURIComponent(encrypted)})}`
       );
     } catch (error) {
       console.error(error);

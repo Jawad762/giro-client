@@ -5,6 +5,7 @@ export interface UserType {
     lastName: string
     profilePicture?: string
     role: string
+    isConfirmed: boolean
 }
 
 export interface JwtType {

@@ -41,7 +41,11 @@ const Login = () => {
       dispatch(updateUser(data.user));
       dispatch(updateJwt(data.jwt));
 
-      router.push("/");
+      if (!data.user.isConfirmed) {
+        router.push(`/verifyEmail`);
+      }
+
+      router.push(`/${data.user.role}`);
     } catch (error: any) {
       console.error(error);
       setError(error.response.data.errorMessage);
@@ -63,7 +67,7 @@ const Login = () => {
       <div className="flex-1 pt-10 w-full max-w-lg mx-auto space-y-6">
         <form onSubmit={handleLogin} className="space-y-5">
           <h2 className="text-4xl font-bold">Login</h2>
-          {error && <p className="border border-blueSecondary p-3 rounded-md flex items-center gap-2 shadow-xl"><PiWarningCircle className="size-6"/> {error}</p>}
+          {error && <p className="bg-darkSecondary p-3 rounded-md flex items-center gap-2 shadow-xl"><PiWarningCircle className="size-6 text-red-500"/> {error}</p>}
           <div className="mb-5">
             <input
               type="email"

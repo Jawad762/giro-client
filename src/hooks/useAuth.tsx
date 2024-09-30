@@ -4,10 +4,11 @@ import { usePathname } from "next/navigation";
 import { useAppSelector } from "@/redux/store";
 import { api } from "@/axios";
 
-const nonProtectedRoutes = ["/auth/login", "/auth/register"];
+export const nonProtectedRoutes = ["/auth/login", "/auth/register", "/verifyCode"];
 
 const useAuth = () => {
-  const { jwt, user } = useAppSelector((state) => state.main);
+  const jwt = useAppSelector((state) => state.main.jwt);
+  const user = useAppSelector((state) => state.main.user);
   const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
   const [loading, setLoading] = useState(true);
   const pathname = usePathname();
@@ -33,7 +34,7 @@ const useAuth = () => {
     checkAuth();
   }, [pathname]);
 
-  return { isAuthenticated, loading };
+  return { isAuthenticated, loading, user };
 };
 
 export default useAuth;

@@ -43,7 +43,7 @@ const Register = () => {
       dispatch(updateUser(data.user))
       dispatch(updateJwt(data.jwt))
 
-      router.push('/')
+      router.push(`/verifyEmail`);
     } catch (error: any) {
       console.error(error);
       setError(error.response.data.errorMessage)
@@ -75,7 +75,7 @@ const Register = () => {
               / {role === "rider" ? "driver" : "rider"}
             </button>
           </h2>
-          {error && <p className="border border-blueSecondary p-3 rounded-md flex items-center gap-2 shadow-xl"><PiWarningCircle className="size-6"/> {error}</p>}
+          {error && <p className="bg-darkSecondary p-3 rounded-md flex items-center gap-2 shadow-xl"><PiWarningCircle className="size-6 text-red-500"/> {error}</p>}
           <div className="mb-5 flex items-center gap-4">
             <input
               id="first_name"

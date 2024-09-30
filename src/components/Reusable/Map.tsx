@@ -1,17 +1,22 @@
 'use client'
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import Map, { Marker, Source, Layer } from 'react-map-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
-import axios from 'axios';
-
-const MAPBOX_TOKEN = process.env.NEXT_PUBLIC_MAPBOX_API_KEY;
 
 type Location = {
     long: number
     lat: number
 }
 
-const MapComponent = ({ location, destination }: { location: Location, destination: Location}) => {
+export type RideInfo = {
+    geoJSON: any
+    distance: number
+    duration: number
+}
+
+const MAPBOX_TOKEN = process.env.NEXT_PUBLIC_MAPBOX_API_KEY;
+
+const MapComponent = ({ location, destination, rideInfo }: { location: Location, destination: Location, rideInfo: RideInfo }) => {
 
     const driverLocation = {
         lat: 33.8434708,
@@ -23,29 +28,6 @@ const MapComponent = ({ location, destination }: { location: Location, destinati
         longitude: location.long,
         zoom: 13
     });
-
-    const [routeGeoJSON, setRouteGeoJSON] = useState<any>(null);
-
-    useEffect(() => {
-        const getRoute = async () => {
-            const url = `https://api.mapbox.com/directions/v5/mapbox/driving/${location.long},${location.lat};${destination.long},${destination.lat}?geometries=geojson&access_token=${MAPBOX_TOKEN}`;
-
-            const response = await axios.get(url);
-            const data = response.data;
-
-            const routeCoordinates = data.routes[0].geometry.coordinates;
-
-            setRouteGeoJSON({
-                type: 'Feature',
-                geometry: {
-                    type: 'LineString',
-                    coordinates: routeCoordinates
-                }
-            });
-        };
-
-        getRoute();
-    }, [location, destination]);
 
     const lineLayer = {
         id: 'route',
@@ -74,8 +56,8 @@ const MapComponent = ({ location, destination }: { location: Location, destinati
                 <img src='/car-white.svg' alt="Driver's Car" height={40} width={40}/>
             </Marker>
 
-            {routeGeoJSON && (
-                <Source id="route" type="geojson" data={routeGeoJSON}>
+            {rideInfo?.geoJSON && (
+                <Source id="route" type="geojson" data={rideInfo.geoJSON}>
                     {/* @ts-ignore */}
                     <Layer {...lineLayer} />
                 </Source>

@@ -15,13 +15,13 @@ const Header = () => {
     const dispatch = useAppDispatch()
   
     const logout = () => {
+      router.push('/auth/login')
       dispatch(updateUser(null))
       dispatch(updateJwt(null))
-      router.push('/auth/login')
     }
 
   return !path.startsWith('/auth') && user ? (
-    <header className={`_container flex items-center height-20 absolute z-10 ${path !== '/' ? 'border-b border-darkSecondary' : ''}`}>
+    <header className={`_container flex items-center height-20 absolute inset-x-0 z-10 ${path !== '/rider' && path !== '/driver' ? 'border-b border-darkSecondary' : ''}`}>
         <Image src={logo} alt="logo" height={50} width={50} />
         <button className='flex items-center gap-2 ml-auto mr-4 rounded-full bg-white py-2 px-4 text-black text-sm'>{user.firstName} <IoIosArrowDown/></button>
         <button onClick={logout} className='text-3xl'><IoLogOutOutline/></button>

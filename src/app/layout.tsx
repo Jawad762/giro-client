@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
-import { Fira_Sans_Condensed, Inter } from 'next/font/google'
+import { Fira_Sans_Condensed } from 'next/font/google'
 import { ReactQueryProvider } from "@/components/Shared/ReactQueryProvider";
 import AuthChecker from "@/components/Auth/AuthChecker";
 import ReduxProvider from "@/components/Shared/ReduxProvider";
@@ -18,6 +18,7 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  
   return (
     <html lang="en" className="h-full w-full">
       <body
