@@ -10,6 +10,7 @@ import { useAppDispatch } from "@/redux/store";
 import { updateJwt, updateUser } from "@/redux/mainSlice";
 import { useRouter } from "next/navigation";
 import { PiWarningCircle } from "react-icons/pi";
+import { API_URL } from "@/constants";
 
 const Register = () => {
   const [role, setRole] = useState("rider");
@@ -30,7 +31,7 @@ const Register = () => {
       const lastName = form.get("last_name");
 
       const { data } = await axios.post(
-        "http://localhost:5058/api/auth/register",
+        `${API_URL}/api/auth/register`,
         {
           email,
           password,

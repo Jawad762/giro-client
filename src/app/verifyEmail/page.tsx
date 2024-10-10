@@ -9,7 +9,6 @@ import { PiWarningCircle } from "react-icons/pi";
 
 const page = () => {
   const user = useAppSelector((state) => state.main.user);
-  console.log(user)
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const dispatch = useAppDispatch();

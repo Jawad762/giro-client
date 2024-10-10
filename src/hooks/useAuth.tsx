@@ -20,7 +20,9 @@ const useAuth = () => {
       } else if (!jwt || !user) {
         setIsAuthenticated(false);
       } else {
-        await api.get("/helloworld");
+        if (!isAuthenticated) {
+          await api.get("/helloworld");
+        }
         setIsAuthenticated(true);
       }
     } catch (error) {

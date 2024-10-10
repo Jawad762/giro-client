@@ -10,6 +10,7 @@ import { updateJwt, updateUser } from "@/redux/mainSlice";
 import { useAppDispatch } from "@/redux/store";
 import { useRouter } from "next/navigation";
 import { PiWarningCircle } from "react-icons/pi";
+import { API_URL } from "@/constants";
 
 const Login = () => {
   const [isLoading, setIsLoading] = useState(false);
@@ -27,7 +28,7 @@ const Login = () => {
       const password = form.get("password");
 
       const { data } = await axios.post(
-        "http://localhost:5058/api/auth/login",
+        `${API_URL}/api/auth/login`,
         {
           email,
           password,

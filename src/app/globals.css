@@ -44,3 +44,35 @@
     max-width: auto;
   }
 }
+
+._finding-driver-loading:after {
+  position: absolute;
+  content: '';
+  inset-block: 0;
+  background-color: #2746e6;
+  border-radius: 9999px;
+  animation: finding-driver 60s linear forwards;
+}
+
+@keyframes finding-driver {
+  from {
+    width: 0;
+  }
+  to {
+    width: 100%;
+  }
+}
+
+._animate-up {
+  animation: animate-up 1s ease-in-out forwards;
+}
+
+@keyframes animate-up {
+  from {
+    max-height: 0;
+  }
+  to {
+    min-height: 30vh;
+    max-height: 100vh;
+  }
+}

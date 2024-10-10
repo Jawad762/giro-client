@@ -1,7 +1,7 @@
 "use client";
 import React, { useEffect, useState } from "react";
 import Image from "next/image";
-import heroImage from "../../../public/hero.webp";
+import heroImage from "../../../../public/hero.webp";
 import { FaLocationArrow } from "react-icons/fa6";
 import axios from "axios";
 import { LocationType } from "@/types";

@@ -2,30 +2,17 @@
 import React, { useState } from 'react';
 import Map, { Marker, Source, Layer } from 'react-map-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
-
-type Location = {
-    long: number
-    lat: number
-}
-
-export type RideInfo = {
-    geoJSON: any
-    distance: number
-    duration: number
-}
+import { RideInfo } from '@/types';
+import Circle from '../Icons/Circle';
+import Square from '../Icons/Square';
 
 const MAPBOX_TOKEN = process.env.NEXT_PUBLIC_MAPBOX_API_KEY;
 
-const MapComponent = ({ location, destination, rideInfo }: { location: Location, destination: Location, rideInfo: RideInfo }) => {
-
-    const driverLocation = {
-        lat: 33.8434708,
-        long: 35.4987351
-    };
+const ChooseRideMap = ({ rideInfo }: {  rideInfo: RideInfo }) => {
 
     const [viewport, setViewport] = useState({
-        latitude: location.lat,
-        longitude: location.long,
+        latitude: rideInfo.location.lat,
+        longitude: rideInfo.location.long,
         zoom: 13
     });
 
@@ -50,10 +37,12 @@ const MapComponent = ({ location, destination, rideInfo }: { location: Location,
             mapStyle="mapbox://styles/mapbox/dark-v10"
             mapboxAccessToken={MAPBOX_TOKEN}
         >
-            <Marker latitude={location.lat} longitude={location.long} color='black'/>
-            <Marker latitude={destination.lat} longitude={destination.long} color='black'/>
-            <Marker latitude={driverLocation.lat} longitude={driverLocation.long}>
-                <img src='/car-white.svg' alt="Driver's Car" height={40} width={40}/>
+            
+            <Marker latitude={rideInfo.location.lat} longitude={rideInfo.location.long}>
+                <Circle/>
+            </Marker>
+            <Marker latitude={rideInfo.destination.lat} longitude={rideInfo.destination.long}>
+                <Square/>
             </Marker>
 
             {rideInfo?.geoJSON && (
@@ -66,4 +55,4 @@ const MapComponent = ({ location, destination, rideInfo }: { location: Location,
     );
 };
 
-export default MapComponent;
+export default ChooseRideMap;

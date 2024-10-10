@@ -1,14 +1,29 @@
 "use client";
+import useSignalR from "@/hooks/useSignalR";
+import { useAppSelector } from "@/redux/store";
+import { LiveRideMapInfo, RideInfo, UserType } from "@/types";
+import { HubConnection, HubConnectionState } from "@microsoft/signalr";
 import Image from "next/image";
-import { useState } from "react";
+import { Dispatch, SetStateAction, useState } from "react";
 import { MdKeyboardArrowDown } from "react-icons/md";
-import { RideInfo } from "../Reusable/Map";
+import FindingDriver from "./FindingDriver";
 
-const ChooseRide = ({ rideInfo }: { rideInfo: RideInfo }) => {
+const ChooseRide = ({ rideInfo, setLiveRideInfo }: { rideInfo: RideInfo, setLiveRideInfo: Dispatch<SetStateAction<LiveRideMapInfo>> }) => {
+  const user = useAppSelector(state => state.main.user) as UserType
+  const connection = useSignalR()
   const [chosenRide, setChosenRide] = useState("affordable")
   const [showOptions, setShowOptions] = useState(true)
+  const [isSubmitted, setIsSubmitted] = useState(false)
 
-  const cost = 2 + (rideInfo.distance / 2000) + ((rideInfo.duration / 60) * 0.1)
+  const cost = Number((2 + (rideInfo.distance / 2000) + ((rideInfo.duration / 60) * 0.1)).toFixed(0))
+
+  const info = {
+    riderName: user.firstName,
+    riderId: user.id,
+    location: [rideInfo.location.lat, rideInfo.location.long], 
+    destination: [rideInfo.destination.lat, rideInfo.destination.lat],
+    price: chosenRide === 'affordable' ? cost : cost * 1.5
+  }
 
   const now = new Date()
   let currentHours = now.getHours()
@@ -30,6 +45,15 @@ const ChooseRide = ({ rideInfo }: { rideInfo: RideInfo }) => {
   finalHours = finalHours % 12 || 12
 
   const finalPeriod = isPM && finalHours >= currentHours ? "PM" : "AM"
+
+  const requestRide = () => {
+    if (connection?.state === HubConnectionState.Connected) {
+      connection.send('RequestRide', info)
+      setIsSubmitted(true)
+    }
+  }
+
+  if (isSubmitted) return <FindingDriver connection={connection as HubConnection} info={info} setLiveRideInfo={setLiveRideInfo}/>
 
   return (
     <div className="space-y-4 border border-darkSecondary rounded-t-lg md:rounded-b-lg p-4 fixed bottom-0 inset-x-2 z-10 md:static bg-darkPrimary md:bg-transparent md:w-1/2 xl:w-[30%]">
@@ -58,7 +82,7 @@ const ChooseRide = ({ rideInfo }: { rideInfo: RideInfo }) => {
             width={100}
           />
           <div className="text-3xl">
-            <p>USD {cost.toFixed(2)}</p>
+            <p>USD {cost}</p>
             <p className="text-white opacity-50 text-sm">Affordable</p>
           </div>
         </div>
@@ -75,7 +99,7 @@ const ChooseRide = ({ rideInfo }: { rideInfo: RideInfo }) => {
             width={100}
           />
           <div className="text-3xl">
-            <p>USD {(cost * 2).toFixed(2)}</p>
+            <p>USD {cost * 1.5}</p>
             <p className="text-white opacity-50 text-sm">High-Quality</p>
           </div>
         </div>
@@ -84,7 +108,7 @@ const ChooseRide = ({ rideInfo }: { rideInfo: RideInfo }) => {
           🕒 Estimated Arrival by {finalHours}:{finalMinutes.toString()} {finalPeriod}
         </p>
 
-        <button className="bg-white disabled:bg-white/50 text-black rounded-lg py-3 px-6 w-full">
+        <button onClick={requestRide} className="bg-white hover:bg-slate-200 disabled:bg-white/50 text-black rounded-lg py-3 px-6 w-full">
           Confirm Ride
         </button>
       </div>

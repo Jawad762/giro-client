@@ -1,9 +1,10 @@
 import axios from 'axios';
 import { store } from './components/Shared/ReduxProvider';
 import { updateJwt } from './redux/mainSlice';
+import { API_URL } from './constants';
 
 export const api = axios.create({
-    baseURL: 'http://localhost:5058/api',
+    baseURL: `${API_URL}/api`,
     withCredentials: true,
 });
 
@@ -38,7 +39,7 @@ api.interceptors.response.use(
                     return Promise.reject(error);
                 }
 
-                const { data } = await axios.post('http://localhost:5058/api/auth/refresh', {}, { withCredentials: true, headers: {
+                const { data } = await axios.post(`${API_URL}/api/auth/refresh`, {}, { withCredentials: true, headers: {
                     "Authorization": `Bearer ${refreshToken}`
                 } });
 
