@@ -1,48 +1,72 @@
 "use client";
-import { useAppSelector } from "@/redux/store";
-import { ExtendedRideInfo, LiveRideMapInfo } from "@/types";
+import { useAppDispatch, useAppSelector } from "@/redux/store";
+import { ExtendedRideInfo, LatLong, LiveRideMapInfo, RideStatus } from "@/types";
 import { HubConnection, HubConnectionState } from "@microsoft/signalr";
-import { Dispatch, SetStateAction, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { MdKeyboardArrowDown } from "react-icons/md";
-import AcceptedRide from "./AcceptedRide";
+import { updateLiveRideInfo } from "@/redux/mainSlice";
+import { getGeoJson } from "@/helpers";
+import GoToRider from "./GoToRider";
+import GoToDestination from "./GoToDestination";
+import RideComplete from "./RideComplete";
 
-const RideRequests = ({ connection, viewport, setLiveRideInfo }: { connection: HubConnection, viewport: { latitude: number, longitude: number }, setLiveRideInfo: Dispatch<SetStateAction<LiveRideMapInfo>> }) => {
+const RideRequests = ({ connection, location }: { connection: HubConnection, location: LatLong }) => {
   const user = useAppSelector(state => state.main.user)
   const [showOptions, setShowOptions] = useState(true);
   const [rideRequests, setRideRequests] = useState<ExtendedRideInfo[]>([]);
-  const [isRideAccepted, setIsRideAccepted] = useState(false)
+  const liveRideInfo = useAppSelector(state => state.main.liveRideInfo) as LiveRideMapInfo
+  const dispatch = useAppDispatch()
+
+  const handleCancelRide = () => {
+    if (connection?.state === HubConnectionState.Connected) {
+      connection.send('CancelRide', liveRideInfo.riderId)
+    }
+  }
 
   useEffect(() => {
     if (connection) {
       connection.on("RideRequest", (request) => {
         setRideRequests((prev) => [...prev, request]);
       });
+
+      connection.on("CancelRide", (id) => {
+        if (liveRideInfo && liveRideInfo.riderId === id) {
+          dispatch(updateLiveRideInfo(null))
+        }
+
+        setRideRequests((prev) => prev.filter(e => e.riderId !== id));
+      });
     }
 
     return () => {
       if (connection) {
         connection.off("RideRequest");
+        connection.off("CancelRide");
       }
     };
-  }, [connection]);
+  }, [connection, liveRideInfo]);
 
-  const acceptRide = (ride: ExtendedRideInfo) => {
+  const acceptRide = async (ride: ExtendedRideInfo) => {
     if (connection?.state === HubConnectionState.Connected) {
       const info = {
         driverName: `${user.firstName} ${user.lastName}`,
         car: "Honda Civic, Black, 892AB6",
         profilePicture: "abc",
-        location: [viewport.latitude, viewport.longitude],
-        riderConnection: ride.riderConnection
+        location: [location.lat, location.long],
+        riderConnection: ride.riderConnection,
+        riderId: ride.riderId
       }
 
       connection.send('ConfirmRide', info)
-      setIsRideAccepted(true)
-      setRideRequests([])
-      setLiveRideInfo({
+      setRideRequests(prev => prev.filter(e => e.riderId !== ride.riderId))
+      const data = await getGeoJson(
+        { lat: location.lat, long: location.long },
+        { lat: ride.location[0], long: ride.location[1] }
+      )
+      dispatch(updateLiveRideInfo({
         driverLocation: {
-          lat: viewport.latitude,
-          long: viewport.longitude
+          lat: location.lat,
+          long: location.long
         },
         riderLocation: {
           lat: ride.location[0],
@@ -52,13 +76,17 @@ const RideRequests = ({ connection, viewport, setLiveRideInfo }: { connection: H
           lat: ride.destination[0],
           long: ride.destination[1],
         },
-        geoJSON: null,
-        distance: ride.distance
-      })
+        geoJSON: data?.geoJSON,
+        distance: ride.distanceInKilometers,
+        ...info,
+        status: RideStatus.DRIVER_ON_THE_WAY
+      }))
     }
   }
 
-  if (isRideAccepted) return <AcceptedRide/>
+  if (liveRideInfo?.status === RideStatus.DRIVER_ON_THE_WAY) return <GoToRider handleCancelRide={handleCancelRide} />
+  else if (liveRideInfo?.status === RideStatus.HEADING_TO_DESTINATION) return <GoToDestination handleCancelRide={handleCancelRide} />
+  else if (liveRideInfo?.status === RideStatus.ARRIVED_TO_DESTINATION) return <RideComplete />
 
   return (
     <div className="space-y-4 border border-darkSecondary rounded-t-lg md:rounded-b-lg p-4 fixed bottom-0 max-h-[70dvh] md:max-h-full overflow-y-auto inset-x-2 z-10 md:static bg-darkPrimary md:bg-transparent md:w-1/2 xl:w-[30%] flex-grow-0">
@@ -99,7 +127,7 @@ const RideRequests = ({ connection, viewport, setLiveRideInfo }: { connection: H
                 </div>
               </div>
 
-              <p>• {!e.distance ? 'Less than 1' : e.distance}km away</p>
+              <p>• {e.distanceInKilometers < 1 ? 'Less than 1' : e.distanceInKilometers.toFixed(1)}km away</p>
               <p>• to {e.destinationAddress}</p>
 
               <div className="flex gap-2 text-sm">

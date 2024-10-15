@@ -4,63 +4,15 @@ import { MdKeyboardArrowLeft } from "react-icons/md";
 import BaseMap from "@/components/Reusable/Maps/BaseMap";
 import RideRequests from "@/components/Driver/Go/RideRequests";
 import useSignalR from "@/hooks/useSignalR";
-import { Dispatch, SetStateAction, useEffect, useState } from "react";
-import { LatLong, LiveRideMapInfo } from "@/types";
+import {  useState } from "react";
 import LiveRideMap from "@/components/Reusable/Maps/LiveRideMap";
-import axios from "axios";
-
-const MAPBOX_TOKEN = process.env.NEXT_PUBLIC_MAPBOX_API_KEY;
+import { useAppSelector } from "@/redux/store";
+import { LatLong, LiveRideMapInfo } from "@/types";
 
 const page = () => {
+  const liveRideInfo = useAppSelector(state => state.main.liveRideInfo) as LiveRideMapInfo
   const connection = useSignalR()
-  const [viewport, setViewport] = useState<any>(null);
-  const [showLiveMap, setShowLiveMap] = useState(false);
-  const [liveRideInfo, setLiveRideInfo] = useState<null | LiveRideMapInfo>(null);
-
-  const getData = async (loc1: LatLong, loc2: LatLong) => {
-    try {
-      const url = `https://api.mapbox.com/directions/v5/mapbox/driving/${loc1.long},${loc1.lat};${loc2.long},${loc2.lat}?geometries=geojson&access_token=${MAPBOX_TOKEN}`;
-
-      const response = await axios.get(url);
-      const data = response.data;
-      const routeCoordinates = data.routes[0].geometry.coordinates;
-
-      return {
-        geoJSON: {
-          type: "Feature",
-          geometry: {
-            type: "LineString",
-            coordinates: routeCoordinates,
-          },
-        },
-        distance: data.routes[0].distance,
-        duration: data.routes[0].duration,
-      };
-    } catch (error) {
-      console.error(error);
-    }
-  };
-
-  useEffect(() => {
-    const updateMapInfo = async () => {
-      if (!liveRideInfo) return;
-
-      const data = await getData(
-        liveRideInfo.riderLocation,
-        liveRideInfo.driverLocation
-      );
-      setLiveRideInfo({
-        driverLocation: liveRideInfo.driverLocation,
-        riderLocation: liveRideInfo.riderLocation,
-        riderDestination: liveRideInfo.riderDestination,
-        geoJSON: data?.geoJSON,
-        distance: data?.distance
-      });
-      setShowLiveMap(true);
-    };
-
-    updateMapInfo();
-  }, [liveRideInfo]);
+  const [location, setLocation] = useState<LatLong | null>(null);
 
   return connection && (
     <section className="flex-1 flex flex-col _container w-full">
@@ -70,12 +22,12 @@ const page = () => {
           Back
         </Link>
         <div className="flex justify-between gap-12 flex-1">
-          <RideRequests connection={connection} viewport={viewport} setLiveRideInfo={setLiveRideInfo as Dispatch<SetStateAction<LiveRideMapInfo>>}/>
+          <RideRequests connection={connection} location={location as LatLong}/>
           <section className="w-full md:w-1/2 xl:w-[70%] max-h-screen">
-          {showLiveMap ? (
-            <LiveRideMap liveRideInfo={liveRideInfo as LiveRideMapInfo}/>
+          {liveRideInfo ? (
+            <LiveRideMap connection={connection} />
           ) : (
-            <BaseMap connection={connection} viewport={viewport} setViewport={setViewport}/>
+            <BaseMap connection={connection} location={location} setLocation={setLocation}/>
           )}
           </section>
         </div>

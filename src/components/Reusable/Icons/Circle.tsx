@@ -4,8 +4,8 @@ const Circle = () => {
   return (
     <div className="bg-white rounded-full">
       <svg
-        width="20"
-        height="20"
+        width="15"
+        height="15"
         viewBox="0 0 24 24"
         fill="black"
         data-baseweb="icon"

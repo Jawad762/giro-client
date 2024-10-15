@@ -51,11 +51,12 @@ export interface ConfirmRideInfo {
 }
 
 export interface ExtendedRideInfo extends ConfirmRideInfo {
-    duration: number
-    distance: number
+    durationInMinutes: number
+    distanceInKilometers: number
     locationAddress: string
     destinationAddress: string
     riderConnection: string
+    riderId: number
 }
 
 export interface DriverInfo {
@@ -63,12 +64,22 @@ export interface DriverInfo {
     car: string
     profilePicture: string
     location: number[]
+    riderConnection: string
 }
 
-export interface LiveRideMapInfo {
+export enum RideStatus {
+    DRIVER_ON_THE_WAY,
+    HEADING_TO_DESTINATION,
+    ARRIVED_TO_DESTINATION
+}
+
+export interface LiveRideMapInfo extends DriverInfo {
     riderDestination: LatLong
     riderLocation: LatLong
     driverLocation: LatLong
     geoJSON: any
     distance: number
+    riderId: number
+    riderConnection: string
+    status: RideStatus
 }

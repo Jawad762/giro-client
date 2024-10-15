@@ -1,79 +1,117 @@
 "use client";
-import { ConfirmRideInfo, DriverInfo, LiveRideMapInfo } from "@/types";
-import { HubConnection } from "@microsoft/signalr";
+import { ConfirmRideInfo, DriverInfo, LiveRideMapInfo, RideStatus } from "@/types";
+import { HubConnection, HubConnectionState } from "@microsoft/signalr";
 import React, { Dispatch, SetStateAction, useEffect, useState } from "react";
 import DriverNotFound from "./DriverNotFound";
-import DriverFound from "./DriverFound";
+import DriverOnTheWay from "./DriverOnTheWay";
+import { useAppDispatch, useAppSelector } from "@/redux/store";
+import { updateLiveRideInfo } from "@/redux/mainSlice";
+import { getGeoJson } from "@/helpers";
+import DriverIsHere from "./DriverIsHere";
+import RideComplete from "@/components/Driver/Go/RideComplete";
 
 const FindingDriver = ({
   connection,
   info,
-  setLiveRideInfo
+  setIsSubmitted,
 }: {
   connection: HubConnection;
   info: ConfirmRideInfo;
-  setLiveRideInfo: Dispatch<SetStateAction<LiveRideMapInfo>>
+  setIsSubmitted: Dispatch<SetStateAction<boolean>>;
 }) => {
-  const [timeElapsed, setTimeElapsed] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
-  const [driverInfo, setDriverInfo] = useState<null | DriverInfo>(null);
+  const liveRideInfo = useAppSelector((state) => state.main.liveRideInfo) as LiveRideMapInfo
+  const dispatch = useAppDispatch();
+
+  const handleCancelRide = () => {
+    if (connection?.state === HubConnectionState.Connected) {
+      connection.send("CancelRide", info.riderId);
+    }
+  };
 
   useEffect(() => {
     if (connection) {
-      connection.on("AcceptRide", (info) => {
-        setIsLoading(false)
-        setDriverInfo(info)
-        setTimeElapsed(0)
+      const handleAcceptRide = async (driverInfo: DriverInfo) => {
+        const data = await getGeoJson(
+          { lat: info.location[0], long: info.location[1] },
+          { lat: driverInfo.location[0], long: driverInfo.location[1] }
+        );
+
+        dispatch(
+          updateLiveRideInfo({
+            driverLocation: {
+              lat: driverInfo.location[0],
+              long: driverInfo.location[1],
+            },
+            riderLocation: {
+              lat: info.location[0],
+              long: info.location[1],
+            },
+            riderDestination: {
+              lat: info.destination[0],
+              long: info.destination[1],
+            },
+            riderId: info.riderId,
+            geoJSON: data?.geoJSON,
+            distance: data?.distance,
+            status: RideStatus.DRIVER_ON_THE_WAY,
+            ...driverInfo,
+          })
+        );
+        setIsLoading(false);
+      };
+
+      connection.on("AcceptRide", handleAcceptRide);
+
+      connection.on("CancelRide", (id) => {
+        if (id === info.riderId) {
+          setIsSubmitted(false);
+          dispatch(updateLiveRideInfo(null));
+        }
       });
+
+      return () => {
+        connection.off("AcceptRide");
+        connection.off("CancelRide");
+      };
     }
   }, [connection]);
 
   useEffect(() => {
-    let interval: undefined | NodeJS.Timeout;
+    let timeout: NodeJS.Timeout | undefined;
 
-    if (isLoading) {
-      interval = setInterval(() => setTimeElapsed((prev) => prev + 1), 1000);
+    if (isLoading && !liveRideInfo) {
+      timeout = setTimeout(() => setIsLoading(false), 60000)
     } else {
-      clearInterval(interval);
+      clearTimeout(timeout);
     }
 
-    return () => clearInterval(interval);
-  }, [isLoading]);
+    return () => clearTimeout(timeout);
+  }, [isLoading, liveRideInfo]);
 
-  if (timeElapsed >= 60) {
-    setIsLoading(false);
-    setTimeElapsed(0);
-  }
-
-  useEffect(() => {
-    if (!isLoading && driverInfo) {
-      setLiveRideInfo({
-        riderLocation: {
-          lat: info.location[0],
-          long: info.location[1]
-        },
-        driverLocation: {
-          lat: driverInfo.location[0],
-          long: driverInfo.location[1]
-        },
-        riderDestination: {
-          lat: info.destination[0],
-          long: info.destination[1],
-        },
-        distance: 0,
-        geoJSON: null
-      })
-    }
-  }, [isLoading, driverInfo])
-
-  if (!isLoading && !driverInfo) return <DriverNotFound connection={connection} info={info} setIsLoading={setIsLoading}/>
-
-  if (!isLoading && driverInfo) return <DriverFound driverInfo={driverInfo}/>
+  if (liveRideInfo?.status === RideStatus.DRIVER_ON_THE_WAY) return <DriverOnTheWay handleCancelRide={handleCancelRide} />
+  else if (liveRideInfo?.status === RideStatus.HEADING_TO_DESTINATION) return <DriverIsHere handleCancelRide={handleCancelRide} />
+  else if (liveRideInfo?.status === RideStatus.ARRIVED_TO_DESTINATION) return <RideComplete />
+  else if (!isLoading && !liveRideInfo)
+    return (
+      <DriverNotFound
+        connection={connection}
+        info={info}
+        setIsLoading={setIsLoading}
+        handleCancelRide={handleCancelRide}
+      />
+    );
 
   return (
     <div className="space-y-4 border border-darkSecondary rounded-t-lg md:rounded-b-lg p-4 fixed bottom-0 inset-x-2 z-10 md:static bg-darkPrimary md:bg-transparent md:w-1/2 xl:w-[30%] _animate-up">
       <h2 className="text-4xl">Finding Driver</h2>
       <div className="h-1 w-full rounded-full bg-darkSecondary relative _finding-driver-loading"></div>
+      <button
+        onClick={handleCancelRide}
+        className="bg-darkSecondary text-white rounded-lg w-full py-3"
+      >
+        Cancel Ride
+      </button>
     </div>
   );
 };

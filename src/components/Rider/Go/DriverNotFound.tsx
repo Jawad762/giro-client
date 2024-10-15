@@ -1,22 +1,29 @@
 import { ConfirmRideInfo } from "@/types";
 import { HubConnection, HubConnectionState } from "@microsoft/signalr";
-import React, { Dispatch, SetStateAction } from "react";
+import React, { Dispatch, SetStateAction, useEffect } from "react";
 
 const DriverNotFound = ({
   connection,
   info,
   setIsLoading,
+  handleCancelRide
 }: {
   connection: HubConnection;
   info: ConfirmRideInfo;
   setIsLoading: Dispatch<SetStateAction<boolean>>;
+  handleCancelRide: any
 }) => {
+  
   const handleTryAgain = () => {
     if (connection?.state === HubConnectionState.Connected) {
       connection.send("RequestRide", info);
       setIsLoading(true);
     }
   };
+
+  useEffect(() => {
+    handleCancelRide()
+  }, [])
 
   return (
     <div className="space-y-4 border border-darkSecondary rounded-t-lg md:rounded-b-lg p-4 fixed bottom-0 inset-x-2 z-10 md:static bg-darkPrimary md:bg-transparent md:w-1/2 xl:w-[30%] _animate-up">

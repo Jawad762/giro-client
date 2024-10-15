@@ -1,16 +1,15 @@
 "use client";
-import useSignalR from "@/hooks/useSignalR";
 import { useAppSelector } from "@/redux/store";
-import { LiveRideMapInfo, RideInfo, UserType } from "@/types";
+import { RideInfo, UserType } from "@/types";
 import { HubConnection, HubConnectionState } from "@microsoft/signalr";
 import Image from "next/image";
-import { Dispatch, SetStateAction, useState } from "react";
+import { useState } from "react";
 import { MdKeyboardArrowDown } from "react-icons/md";
 import FindingDriver from "./FindingDriver";
 
-const ChooseRide = ({ rideInfo, setLiveRideInfo }: { rideInfo: RideInfo, setLiveRideInfo: Dispatch<SetStateAction<LiveRideMapInfo>> }) => {
+const ChooseRide = ({ rideInfo, connection }: { rideInfo: RideInfo, connection: HubConnection }) => {
   const user = useAppSelector(state => state.main.user) as UserType
-  const connection = useSignalR()
+  const liveRideInfo = useAppSelector(state => state.main.liveRideInfo)
   const [chosenRide, setChosenRide] = useState("affordable")
   const [showOptions, setShowOptions] = useState(true)
   const [isSubmitted, setIsSubmitted] = useState(false)
@@ -53,7 +52,7 @@ const ChooseRide = ({ rideInfo, setLiveRideInfo }: { rideInfo: RideInfo, setLive
     }
   }
 
-  if (isSubmitted) return <FindingDriver connection={connection as HubConnection} info={info} setLiveRideInfo={setLiveRideInfo}/>
+  if (isSubmitted || liveRideInfo) return <FindingDriver connection={connection as HubConnection} info={info} setIsSubmitted={setIsSubmitted}/>
 
   return (
     <div className="space-y-4 border border-darkSecondary rounded-t-lg md:rounded-b-lg p-4 fixed bottom-0 inset-x-2 z-10 md:static bg-darkPrimary md:bg-transparent md:w-1/2 xl:w-[30%]">

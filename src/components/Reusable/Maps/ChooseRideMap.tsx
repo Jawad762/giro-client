@@ -1,20 +1,17 @@
 'use client'
-import React, { useState } from 'react';
-import Map, { Marker, Source, Layer } from 'react-map-gl';
+import React, { useEffect, useRef } from 'react';
+import Map, { Marker, Source, Layer, MapRef } from 'react-map-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
-import { RideInfo } from '@/types';
+import { LatLong, RideInfo } from '@/types';
 import Circle from '../Icons/Circle';
 import Square from '../Icons/Square';
+import { LngLatBounds } from 'mapbox-gl';
 
 const MAPBOX_TOKEN = process.env.NEXT_PUBLIC_MAPBOX_API_KEY;
 
 const ChooseRideMap = ({ rideInfo }: {  rideInfo: RideInfo }) => {
 
-    const [viewport, setViewport] = useState({
-        latitude: rideInfo.location.lat,
-        longitude: rideInfo.location.long,
-        zoom: 13
-    });
+    const mapRef = useRef<MapRef>(null)
 
     const lineLayer = {
         id: 'route',
@@ -30,9 +27,29 @@ const ChooseRideMap = ({ rideInfo }: {  rideInfo: RideInfo }) => {
         }
     };
 
+    const fitMapToBounds = (location: LatLong, destination: LatLong) => {
+        const bounds = new LngLatBounds(
+          [Math.min(location.long, destination.long), Math.min(location.lat, destination.lat)],
+          [Math.max(location.long, destination.long), Math.max(location.lat, destination.lat)]
+        );
+
+        mapRef.current?.fitBounds(bounds, {
+          padding: 50,
+          duration: 1000
+        });
+    };
+
+    useEffect(() => {
+        if (rideInfo.location && rideInfo.destination) {
+            setTimeout(() => {
+                fitMapToBounds(rideInfo.location, rideInfo.destination);
+            }, 200)
+        }
+      }, [rideInfo.destination, rideInfo.location]);
+
     return (
         <Map
-            initialViewState={viewport}
+            ref={mapRef}
             style={{ width: '100%', height: '100%', borderRadius: 10 }}
             mapStyle="mapbox://styles/mapbox/dark-v10"
             mapboxAccessToken={MAPBOX_TOKEN}
