@@ -1,10 +1,11 @@
 "use client";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef } from "react";
 import Map, { MapRef, Marker } from "react-map-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
 import { HubConnection, HubConnectionState } from "@microsoft/signalr";
-import { LatLong } from "@/types";
+import { LatLong, UserType } from "@/types";
 import { LngLatBounds } from "mapbox-gl";
+import { useAppSelector } from "@/redux/store";
 
 const MAPBOX_TOKEN = process.env.NEXT_PUBLIC_MAPBOX_API_KEY;
 
@@ -17,6 +18,7 @@ const BaseMap = ({
   location: LatLong | null;
   setLocation: any;
 }) => {
+  const user = useAppSelector(state => state.main.user) as UserType
   const mapRef = useRef<MapRef>(null);
 
   useEffect(() => {
@@ -38,7 +40,7 @@ const BaseMap = ({
           long,
         });
         if (connection?.state === HubConnectionState.Connected) {
-          connection.send("SubscribeToLocation", lat, long);
+          connection.send("SubscribeToLocation", user.id, lat, long);
         }
         console.log(
           `lat = ${lat}`,
@@ -54,7 +56,7 @@ const BaseMap = ({
 
     return () => {
       if (connection?.state === HubConnectionState.Connected) {
-        connection.send("UnsubscribeFromLocation");
+        connection.send("UnsubscribeFromLocation", user.id);
       }
       navigator.geolocation.clearWatch(watchId);
     };

@@ -10,6 +10,7 @@ import { HubConnection, HubConnectionState } from "@microsoft/signalr";
 import { LatLong, LiveRideMapInfo, RideStatus, UserType } from "@/types";
 import { calculateHaversineDistance, getGeoJson } from "@/helpers";
 import { LngLatBounds } from "mapbox-gl";
+import debounce from 'lodash.debounce';
 
 const MAPBOX_TOKEN = process.env.NEXT_PUBLIC_MAPBOX_API_KEY;
 
@@ -51,14 +52,14 @@ const LiveRideMap = ({ connection }: { connection: HubConnection }) => {
     }
   }, [liveRideInfo.riderLocation, liveRideInfo.driverLocation]);
 
-  const updateDriverLocation = async (loc: LatLong) => {
+  const updateDriverLocation = debounce(async (loc: LatLong) => {
     dispatch(
       updateLiveRideInfo({
         ...liveRideInfo,
         driverLocation: { lat: loc.lat, long: loc.long },
       })
     );
-    
+  
     if (liveRideInfo.status === RideStatus.DRIVER_ON_THE_WAY) {
       fitMapToBounds(liveRideInfo.driverLocation, liveRideInfo.riderLocation);
       await updateGeoJsonAndStatus(loc, liveRideInfo.riderLocation, RideStatus.HEADING_TO_DESTINATION);
@@ -66,7 +67,7 @@ const LiveRideMap = ({ connection }: { connection: HubConnection }) => {
       fitMapToBounds(liveRideInfo.driverLocation, liveRideInfo.riderDestination);
       await updateGeoJsonAndStatus(loc, liveRideInfo.riderDestination, RideStatus.ARRIVED_TO_DESTINATION);
     }
-  };
+  }, 2000);
 
   const updateGeoJsonAndStatus = async (currentLoc: LatLong, targetLoc: LatLong, nextStatus: RideStatus) => {
     const newGeoJson = await getGeoJson(currentLoc, targetLoc);
@@ -84,17 +85,20 @@ const LiveRideMap = ({ connection }: { connection: HubConnection }) => {
         const { latitude: lat, longitude: long, accuracy } = position.coords;
 
         if (connection?.state === HubConnectionState.Connected) {
-          connection.send("DriverLocationChange", lat, long, liveRideInfo.riderConnection);
+          connection.send("DriverLocationChange", lat, long, liveRideInfo.riderId, user.id);
         }
 
-        await updateDriverLocation({ lat, long });
+        updateDriverLocation({ lat, long });
         console.log(`lat = ${lat}`, `long = ${long}`, `accuracy = ${accuracy}m`);
       },
       (error) => console.error(error),
       { enableHighAccuracy: true }
     );
 
-    return () => navigator.geolocation.clearWatch(watchId);
+    return () => {
+      navigator.geolocation.clearWatch(watchId)
+      updateDriverLocation.cancel()
+    };
   };
 
   const fitMapToBounds = (driverLoc: LatLong, targetLoc: LatLong) => {
@@ -109,7 +113,6 @@ const LiveRideMap = ({ connection }: { connection: HubConnection }) => {
     });
   };
 
-  console.log(liveRideInfo)
   return (
     <Map
       ref={mapRef}

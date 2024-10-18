@@ -7,6 +7,7 @@ import { usePathname, useRouter } from 'next/navigation';
 import { updateJwt, updateUser } from '@/redux/mainSlice';
 import { IoIosArrowDown } from "react-icons/io";
 import { IoLogOutOutline } from "react-icons/io5";
+import Link from 'next/link';
 
 const Header = () => {
     const user = useAppSelector(state => state.main.user)
@@ -21,9 +22,9 @@ const Header = () => {
     }
 
   return !path.startsWith('/auth') && user ? (
-    <header className={`_container flex items-center height-20 absolute inset-x-0 z-10 ${path !== '/rider' && path !== '/driver' ? 'border-b border-darkSecondary' : ''}`}>
+    <header className={`_container flex items-center absolute inset-x-0 z-10 ${path !== '/rider' && path !== '/driver' ? 'border-b border-darkSecondary' : ''}`}>
         <Image src={logo} alt="logo" height={50} width={50} />
-        <button className='flex items-center gap-2 ml-auto mr-4 rounded-full bg-white py-2 px-4 text-black text-sm'>{user.firstName} <IoIosArrowDown/></button>
+        <Link href={`/${user.role}/profile`} className='flex items-center gap-2 ml-auto mr-4 rounded-full bg-white py-2 px-4 text-black text-sm'>{user.firstName} <IoIosArrowDown/></Link>
         <button onClick={logout} className='text-3xl'><IoLogOutOutline/></button>
     </header>
   ) : null

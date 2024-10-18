@@ -41,7 +41,7 @@ const page = () => {
   return connection && (
     <section className="flex-1 flex flex-col _container w-full">
       <div className="pt-20 xl:pt-24 flex flex-col gap-3 flex-1">
-        <Link href={"/rider"} className="flex items-center">
+        <Link href={"/rider"} className="flex items-center w-fit">
           <MdKeyboardArrowLeft className="h-6 w-6" />
           Back
         </Link>

@@ -53,8 +53,8 @@ const RideRequests = ({ connection, location }: { connection: HubConnection, loc
         car: "Honda Civic, Black, 892AB6",
         profilePicture: "abc",
         location: [location.lat, location.long],
-        riderConnection: ride.riderConnection,
-        riderId: ride.riderId
+        riderId: ride.riderId,
+        driverId: user.id
       }
 
       connection.send('ConfirmRide', info)
@@ -63,6 +63,7 @@ const RideRequests = ({ connection, location }: { connection: HubConnection, loc
         { lat: location.lat, long: location.long },
         { lat: ride.location[0], long: ride.location[1] }
       )
+
       dispatch(updateLiveRideInfo({
         driverLocation: {
           lat: location.lat,

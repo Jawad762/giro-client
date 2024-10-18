@@ -55,7 +55,6 @@ export interface ExtendedRideInfo extends ConfirmRideInfo {
     distanceInKilometers: number
     locationAddress: string
     destinationAddress: string
-    riderConnection: string
     riderId: number
 }
 
@@ -64,7 +63,6 @@ export interface DriverInfo {
     car: string
     profilePicture: string
     location: number[]
-    riderConnection: string
 }
 
 export enum RideStatus {
@@ -80,6 +78,5 @@ export interface LiveRideMapInfo extends DriverInfo {
     geoJSON: any
     distance: number
     riderId: number
-    riderConnection: string
     status: RideStatus
 }
