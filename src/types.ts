@@ -56,13 +56,14 @@ export interface ExtendedRideInfo extends ConfirmRideInfo {
     locationAddress: string
     destinationAddress: string
     riderId: number
+    riderProfilePicture: string
 }
 
 export interface DriverInfo {
     driverName: string
     car: string
-    profilePicture: string
     location: number[]
+    driverProfilePicture: string
 }
 
 export enum RideStatus {
@@ -79,4 +80,10 @@ export interface LiveRideMapInfo extends DriverInfo {
     distance: number
     riderId: number
     status: RideStatus
+}
+
+export interface VehicleInfo {
+    type: string | null;
+    color: string | null;
+    licenseNumber: string | null
 }

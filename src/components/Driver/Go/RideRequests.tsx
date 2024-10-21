@@ -1,6 +1,6 @@
 "use client";
 import { useAppDispatch, useAppSelector } from "@/redux/store";
-import { ExtendedRideInfo, LatLong, LiveRideMapInfo, RideStatus } from "@/types";
+import { ExtendedRideInfo, LatLong, LiveRideMapInfo, RideStatus, VehicleInfo } from "@/types";
 import { HubConnection, HubConnectionState } from "@microsoft/signalr";
 import { useEffect, useState } from "react";
 import { MdKeyboardArrowDown } from "react-icons/md";
@@ -15,6 +15,7 @@ const RideRequests = ({ connection, location }: { connection: HubConnection, loc
   const [showOptions, setShowOptions] = useState(true);
   const [rideRequests, setRideRequests] = useState<ExtendedRideInfo[]>([]);
   const liveRideInfo = useAppSelector(state => state.main.liveRideInfo) as LiveRideMapInfo
+  const vehicleInfo = useAppSelector(state => state.main.vehicleInfo) as VehicleInfo
   const dispatch = useAppDispatch()
 
   const handleCancelRide = () => {
@@ -50,13 +51,14 @@ const RideRequests = ({ connection, location }: { connection: HubConnection, loc
     if (connection?.state === HubConnectionState.Connected) {
       const info = {
         driverName: `${user.firstName} ${user.lastName}`,
-        car: "Honda Civic, Black, 892AB6",
-        profilePicture: "abc",
+        car: vehicleInfo ? `${vehicleInfo.type},${vehicleInfo.color},${vehicleInfo.licenseNumber}` : 'Undisclosed',
         location: [location.lat, location.long],
         riderId: ride.riderId,
-        driverId: user.id
+        driverId: user.id,
+        driverProfilePicture: user.profilePicture
       }
 
+      console.log(ride)
       connection.send('ConfirmRide', info)
       setRideRequests(prev => prev.filter(e => e.riderId !== ride.riderId))
       const data = await getGeoJson(
@@ -116,12 +118,10 @@ const RideRequests = ({ connection, location }: { connection: HubConnection, loc
               className="space-y-3 border-2 border-darkSecondary rounded-lg p-3"
             >
               <div className="flex items-center gap-3">
-                <img
-                  src="/pfp-placeholder.png"
-                  height={50}
-                  width={50}
-                  className="rounded-full object-cover"
-                />
+              <img
+                src={e.riderProfilePicture}
+                className="rounded-full object-cover size-14"
+              />
                 <div>
                   <p className="text-lg">{e.riderName}</p>
                   <p className="opacity-75">USD {e.price}</p>

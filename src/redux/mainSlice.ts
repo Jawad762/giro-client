@@ -1,4 +1,4 @@
-import { JwtType, LiveRideMapInfo, UserType } from '@/types'
+import { JwtType, LiveRideMapInfo, UserType, VehicleInfo } from '@/types'
 import { createSlice } from '@reduxjs/toolkit'
 import type { PayloadAction } from '@reduxjs/toolkit'
 
@@ -6,12 +6,14 @@ interface InitialState {
   user: UserType | null
   jwt: JwtType | null
   liveRideInfo : LiveRideMapInfo | null
+  vehicleInfo: VehicleInfo | null
 }
 
 const initialState: InitialState = {
   user: null,
   jwt: null,
-  liveRideInfo: null
+  liveRideInfo: null,
+  vehicleInfo: null
 }
 
 export const mainSlice = createSlice({
@@ -26,10 +28,18 @@ export const mainSlice = createSlice({
     },
     updateLiveRideInfo: (state, action: PayloadAction<LiveRideMapInfo | null>) => {
       state.liveRideInfo = action.payload
+    },
+    updateVehicleInfo: (state, action: PayloadAction<VehicleInfo | null>) => {
+      state.vehicleInfo = action.payload
+    },
+    logout: (state) => {
+      state.jwt = null
+      state.user = null
+      state.vehicleInfo = null
     }
   },
 })
 
-export const { updateUser, updateJwt, updateLiveRideInfo } = mainSlice.actions
+export const { updateUser, updateJwt, updateLiveRideInfo, updateVehicleInfo, logout } = mainSlice.actions
 
 export default mainSlice.reducer

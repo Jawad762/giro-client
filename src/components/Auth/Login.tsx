@@ -6,7 +6,7 @@ import Link from "next/link";
 import axios from "axios";
 import { MdKeyboardArrowLeft } from "react-icons/md";
 import Spinner from "../Reusable/Spinner";
-import { updateJwt, updateUser } from "@/redux/mainSlice";
+import { updateJwt, updateUser, updateVehicleInfo } from "@/redux/mainSlice";
 import { useAppDispatch } from "@/redux/store";
 import { useRouter } from "next/navigation";
 import { PiWarningCircle } from "react-icons/pi";
@@ -35,12 +35,13 @@ const Login = () => {
         }
       );
 
-      if (!data.user || !data.jwt) {
+      if (!data.user || !data.jwt || (data.user?.role === 'driver' && !data.vehicle)) {
         throw new Error("Something went wrong");
       }
 
-      dispatch(updateUser(data.user));
+      dispatch(updateUser({...data.user, profilePicture: data.user.profilePicture ? data.user.profilePicture : '/pfp-placeholder.png'}));
       dispatch(updateJwt(data.jwt));
+      dispatch(updateVehicleInfo(data.vehicle));
 
       if (!data.user.isConfirmed) {
         router.push(`/verifyEmail`);

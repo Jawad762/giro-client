@@ -9,6 +9,7 @@ import { updateLiveRideInfo } from "@/redux/mainSlice";
 import { getGeoJson } from "@/helpers";
 import DriverIsHere from "./DriverIsHere";
 import RideComplete from "@/components/Driver/Go/RideComplete";
+import { useRouter, useSearchParams } from "next/navigation";
 
 const FindingDriver = ({
   connection,
@@ -22,9 +23,16 @@ const FindingDriver = ({
   const [isLoading, setIsLoading] = useState(true);
   const liveRideInfo = useAppSelector((state) => state.main.liveRideInfo) as LiveRideMapInfo
   const dispatch = useAppDispatch();
+  const searchParams = useSearchParams()
+  const router = useRouter()
 
-  const handleCancelRide = () => {
+  const handleCancelRide = (destroySession: boolean) => {
     if (connection?.state === HubConnectionState.Connected) {
+      if (destroySession && searchParams.get('session_id')) {
+        const params = new URLSearchParams(searchParams); 
+        params.delete('session_id'); 
+        router.push(`${window.location.pathname}?${params.toString()}`);
+      }
       connection.send("CancelRide", info.riderId);
     }
   };
@@ -107,7 +115,7 @@ const FindingDriver = ({
       <h2 className="text-4xl">Finding Driver</h2>
       <div className="h-1 w-full rounded-full bg-darkSecondary relative _finding-driver-loading"></div>
       <button
-        onClick={handleCancelRide}
+        onClick={() => handleCancelRide(false)}
         className="bg-darkSecondary text-white rounded-lg w-full py-3"
       >
         Cancel Ride

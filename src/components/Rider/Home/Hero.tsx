@@ -30,10 +30,13 @@ const Hero = () => {
       navigator.geolocation.getCurrentPosition(async (position: any) => {
         const lat = position.coords.latitude;
         const long = position.coords.longitude;
+        
         try {
           const { data } = await axios.get(
             `https://maps.googleapis.com/maps/api/geocode/json?latlng=${lat},${long}&sensor=true&key=${process.env.NEXT_PUBLIC_GOOGLE_API_KEY}`
           );
+
+          console.log(data)
 
           data.results.forEach((result: any) => {
             if (

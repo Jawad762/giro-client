@@ -50,7 +50,7 @@
   content: '';
   inset-block: 0;
   background-color: #2746e6;
-  border-radius: 9999px;
+  border-radius: 50px;
   animation: finding-driver 60s linear forwards;
 }
 
@@ -75,4 +75,24 @@
     min-height: 30vh;
     max-height: 100vh;
   }
+}
+
+html {
+  scrollbar-width: thin;
+  scrollbar-color: #2746e6 #222222; 
+}
+
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: #2746e6;
+  border-radius: 9999px;
+}
+
+::-webkit-scrollbar-track {
+  background-color: #222222;
+  border-radius: 50px;
 }

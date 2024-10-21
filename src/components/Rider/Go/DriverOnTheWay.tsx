@@ -10,17 +10,15 @@ const DriverOnTheWay = ({ handleCancelRide }: { handleCancelRide: any }) => {
       <h2 className="text-4xl">Your Driver is on the way!</h2>
       <div className="flex items-center gap-3">
         <img
-          src="/pfp-placeholder.png"
-          height={50}
-          width={50}
-          className="rounded-full object-cover"
+          src={liveRideInfo.driverProfilePicture}
+          className="rounded-full object-cover size-14"
         />
         <div>
           <p className="text-lg">{liveRideInfo.driverName}</p>
           <p className="opacity-75">{liveRideInfo.car}</p>
         </div>
       </div>
-      <button onClick={handleCancelRide} className="bg-darkSecondary text-white rounded-lg w-full py-3">Cancel Ride</button>
+      <button onClick={() => handleCancelRide(true)} className="bg-darkSecondary text-white rounded-lg w-full py-3">Cancel Ride</button>
     </div>
   );
 };

@@ -6,7 +6,7 @@ export default function AuthLayout({
     children: React.ReactNode
   }) {
     return (
-      <section className="flex h-full p-4">
+      <section className="flex min-h-screen p-4">
         <WelcomeGradient/>
         {children}
       </section>

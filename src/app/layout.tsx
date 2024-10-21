@@ -24,7 +24,7 @@ export default function RootLayout({
       <body
         className={`${FiraFont.className} antialiased h-full w-full bg-darkPrimary text-white`}
       >
-        <main className="h-full w-full flex flex-col">
+        <main className="min-h-full w-full flex flex-col">
           <ReduxProvider>
             <AuthChecker>
               <ReactQueryProvider>
