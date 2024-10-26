@@ -118,17 +118,19 @@ const Hero = () => {
 
   const handleSeePrices = (e: React.FormEvent<HTMLFormElement>) => {
     try {
+      console.log('here')
       e.preventDefault();
       const obj = {
         location: {
-          lat: location?.lat,
-          long: location?.long
+          lat: parseFloat(location?.lat?.toFixed(7) as string),
+          long: parseFloat(location?.long?.toFixed(7) as string)
         },
         destination: {
-          lat: destination?.lat,
-          long: destination?.long
+          lat: parseFloat(destination?.lat?.toFixed(7) as string),
+          long: parseFloat(destination?.long?.toFixed(7) as string)
         }
       }
+
       const encrypted = CryptoJS.AES.encrypt(JSON.stringify(obj), process.env.NEXT_PUBLIC_ENCRYPTION_KEY as string).toString();
       router.push(
         `/rider/go?data=${encodeURIComponent(encrypted)})}`
