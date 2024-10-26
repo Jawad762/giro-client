@@ -118,7 +118,6 @@ const Hero = () => {
 
   const handleSeePrices = (e: React.FormEvent<HTMLFormElement>) => {
     try {
-      console.log('here')
       e.preventDefault();
       const obj = {
         location: {
