@@ -1,4 +1,4 @@
-export const API_URL = "http://localhost:5058"
+export const API_URL = "https://giro-api.onrender.com"
 
 export const carColors = [
     "White",

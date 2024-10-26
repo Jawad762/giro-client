@@ -29,9 +29,9 @@ const ChooseRide = ({
   const [paymentMethod, setPaymentMethod] = useState("cash");
   const [isPaid, setIsPaid] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [isError, setIsError] = useState(false)
+  const [isError, setIsError] = useState(false);
   const searchParams = useSearchParams();
-  const router = useRouter()
+  const router = useRouter();
 
   const cost = Number(
     (2 + rideInfo.distance / 2000 + (rideInfo.duration / 60) * 0.1).toFixed(0)
@@ -42,7 +42,7 @@ const ChooseRide = ({
     riderId: user.id,
     location: [rideInfo.location.lat, rideInfo.location.long],
     destination: [rideInfo.destination.lat, rideInfo.destination.lat],
-    price: chosenRide === "affordable" ? cost : cost * 1.5,
+    price: chosenRide === "solo" ? cost : cost * 1.5,
     riderProfilePicture: user.profilePicture,
   };
 
@@ -73,6 +73,7 @@ const ChooseRide = ({
         // * 100 because stripe requires that
         price: chosenRide === "solo" ? cost * 100 : cost * 1.5 * 100,
         returnUrl: window.location.href,
+        rideType: chosenRide.toUpperCase(),
       });
 
       if (data.data.data.url) {
@@ -85,9 +86,9 @@ const ChooseRide = ({
 
   const requestRide = async () => {
     if (paymentMethod === "card" && !isPaid) {
-      setIsLoading(true)
+      setIsLoading(true);
       await confirmPayment();
-      setIsLoading(false)
+      setIsLoading(false);
     } else if (connection?.state === HubConnectionState.Connected) {
       connection.send("RequestRide", info);
       setIsSubmitted(true);
@@ -100,10 +101,10 @@ const ChooseRide = ({
       const data = await api.get(
         `/checkout/check-session?session_id=${sessionId}`
       );
-      if (data.data.data.paymentStatus === 'paid') {
+      if (data.data.data.paymentStatus === "paid") {
         setIsPaid(true);
-      }
-      else throw new Error()
+        setChosenRide(data.data.data.lineItems?.[0].description.split(', ')?.[1]?.toLowerCase())
+      } else throw new Error();
     } catch (error) {
       console.error(error);
       setIsError(true);
@@ -117,8 +118,7 @@ const ChooseRide = ({
     const session_id = searchParams.get("session_id");
     if (session_id) {
       checkSessionStatus(session_id);
-    }
-    else isPaid && setIsPaid(false)
+    } else isPaid && setIsPaid(false);
   }, [searchParams]);
 
   if (isSubmitted || liveRideInfo)
@@ -149,43 +149,45 @@ const ChooseRide = ({
               : "max-md:max-h-0 max-md:overflow-hidden"
           }`}
         >
-          {/* <h3 className="text-2xl">Recommended</h3> */}
-          <div
-            onClick={() => setChosenRide("solo")}
-            className={`cursor-pointer flex items-center justify-between gap-2 border-2 rounded-lg pl-2 pr-6 ${
-              chosenRide === "solo" ? "border-white" : "border-darkSecondary"
-            }`}
-          >
-            <Image
-              src="/car-primary.png"
-              alt="Driver's Car"
-              height={100}
-              width={100}
-            />
-            <div className="text-3xl">
-              <p>USD {cost}</p>
-              <p className="text-white opacity-50 text-sm">Solo</p>
+          {!isPaid || (isPaid && chosenRide === "solo") ? (
+            <div
+              onClick={() => setChosenRide("solo")}
+              className={`cursor-pointer flex items-center justify-between gap-2 border-2 rounded-lg pl-2 pr-6 ${
+                chosenRide === "solo" ? "border-white" : "border-darkSecondary"
+              }`}
+            >
+              <Image
+                src="/car-primary.png"
+                alt="Driver's Car"
+                height={100}
+                width={100}
+              />
+              <div className="text-3xl">
+                <p>USD {cost}</p>
+                <p className="text-white opacity-50 text-sm">Solo</p>
+              </div>
             </div>
-          </div>
-          <div
-            onClick={() => setChosenRide("group-ride")}
-            className={`cursor-pointer flex items-center justify-between gap-2 border-2 rounded-lg pl-2 pr-6 ${
-              chosenRide === "group-ride"
-                ? "border-white"
-                : "border-darkSecondary"
-            }`}
-          >
-            <Image
-              src="/car-primary.png"
-              alt="Driver's Car"
-              height={100}
-              width={100}
-            />
-            <div className="text-3xl">
-              <p>USD {cost * 1.5}</p>
-              <p className="text-white opacity-50 text-sm">Group Ride</p>
+          ) : null}
+
+          {!isPaid || (isPaid && chosenRide === "group") ? (
+            <div
+              onClick={() => setChosenRide("group")}
+              className={`cursor-pointer flex items-center justify-between gap-2 border-2 rounded-lg pl-2 pr-6 ${
+                chosenRide === "group" ? "border-white" : "border-darkSecondary"
+              }`}
+            >
+              <Image
+                src="/car-primary.png"
+                alt="Driver's Car"
+                height={100}
+                width={100}
+              />
+              <div className="text-3xl">
+                <p>USD {cost * 1.5}</p>
+                <p className="text-white opacity-50 text-sm">Group Ride</p>
+              </div>
             </div>
-          </div>
+          ) : null}
 
           {!isPaid ? (
             <div className="space-y-1">
@@ -217,7 +219,7 @@ const ChooseRide = ({
             </div>
           ) : (
             <div className="flex items-center gap-2 text-blueSecondary">
-              <Check/> Paid using card
+              <Check /> Paid using card
             </div>
           )}
 

@@ -36,8 +36,6 @@ const Hero = () => {
             `https://maps.googleapis.com/maps/api/geocode/json?latlng=${lat},${long}&sensor=true&key=${process.env.NEXT_PUBLIC_GOOGLE_API_KEY}`
           );
 
-          console.log(data)
-
           data.results.forEach((result: any) => {
             if (
               result.geometry.location_type === "GEOMETRIC_CENTER" &&
