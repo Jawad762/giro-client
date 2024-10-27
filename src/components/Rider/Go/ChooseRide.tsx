@@ -41,7 +41,7 @@ const ChooseRide = ({
     riderName: user.firstName,
     riderId: user.id,
     location: [rideInfo.location.lat, rideInfo.location.long],
-    destination: [rideInfo.destination.lat, rideInfo.destination.lat],
+    destination: [rideInfo.destination.lat, rideInfo.destination.long],
     price: chosenRide === "solo" ? cost : cost * 1.5,
     riderProfilePicture: user.profilePicture,
   };
