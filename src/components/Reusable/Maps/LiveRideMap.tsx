@@ -84,11 +84,15 @@ const LiveRideMap = ({ connection }: { connection: HubConnection }) => {
       async (position) => {
         const { latitude: lat, longitude: long, accuracy } = position.coords;
 
-        if (connection?.state === HubConnectionState.Connected) {
-          connection.send("DriverLocationChange", lat, long, liveRideInfo.riderId, user.id);
+        const difference = calculateHaversineDistance(lat, long, liveRideInfo.driverLocation?.lat as number, liveRideInfo.driverLocation?.long as number)
+
+        if (difference > 0.02) {
+          updateDriverLocation({ lat, long });
+          if (connection?.state === HubConnectionState.Connected) {
+            connection.send("DriverLocationChange", lat, long, liveRideInfo.riderId, user.id);
+          }
         }
 
-        updateDriverLocation({ lat, long });
         console.log(`lat = ${lat}`, `long = ${long}`, `accuracy = ${accuracy}m`);
       },
       (error) => console.error(error),
