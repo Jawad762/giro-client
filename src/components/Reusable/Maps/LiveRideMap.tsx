@@ -86,7 +86,7 @@ const LiveRideMap = ({ connection }: { connection: HubConnection }) => {
 
         const difference = calculateHaversineDistance(lat, long, liveRideInfo.driverLocation?.lat as number, liveRideInfo.driverLocation?.long as number)
 
-        if (difference > 0.02) {
+        if (!difference || difference > 0.02) {
           updateDriverLocation({ lat, long });
           if (connection?.state === HubConnectionState.Connected) {
             connection.send("DriverLocationChange", lat, long, liveRideInfo.riderId, user.id);

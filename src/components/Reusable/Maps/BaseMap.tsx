@@ -37,7 +37,7 @@ const BaseMap = ({
         const long = position.coords.longitude;
         const accuracy = position.coords.accuracy;
         const difference = calculateHaversineDistance(lat, long, location?.lat as number, location?.long as number)
-        if (difference > 0.02) {
+        if (!difference || difference > 0.02) {
           setLocation({
             lat,
             long,
